@@ -1,22 +1,53 @@
 import React from "react"
-import { Link } from "gatsby"
+import {graphql} from 'gatsby'
 
-import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
-
-const IndexPage = () => (
-  <Layout>
-    <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
+const IndexPage = (data) => {
+  var images = data.data.allFile.edges
+  console.log(images)
+  return(
+    <div style={{position:"fixed", top:"0", left:"0", height:"100vh", width:"100vw"}}>
+    <div style={{display:"flex", overflowX:"scroll"}}>
+      {images.map((image,index) => {
+        return(
+          <div key={index} id={index} tabIndex={index} 
+              style={{padding:'20px', marginBottom:'auto', marginTop:'auto'}}>
+              <picture>
+                  <source type='image/webp' 
+                      sizes={image.node.childImageSharp.fluid.sizes}
+                      srcSet={image.node.childImageSharp.fluid.srcSetWebp}/>
+                  <source 
+                      sizes={image.node.childImageSharp.fluid.sizes}
+                      srcSet={image.node.childImageSharp.fluid.srcSet}/>
+                  
+                  <img sizes={image.node.childImageSharp.fluid.sizes} 
+                      srcSet={image.node.childImageSharp.fluid.srcSet}
+                      src={image.node.childImageSharp.fluid.src}
+                      loading='lazy' alt={`modal-${index}`} style={{maxHeight:'90vh', maxWidth:'85vw'}}/>
+              </picture>
+          </div>
+        )
+        })
+      }
     </div>
-    <Link to="/page-2/">Go to page 2</Link> <br />
-    <Link to="/using-typescript/">Go to "Using TypeScript"</Link>
-  </Layout>
-)
+    </div>
+  )
+}
+
+export const query = graphql`
+  query {
+    allFile(filter: {relativePath: {regex:"/Gallery/"}})
+    {
+      edges{
+        node{
+          id, childImageSharp{
+                     fluid(maxWidth:3840, maxHeight:2160, quality:72 fit:INSIDE){
+              ...GatsbyImageSharpFluid_withWebp
+            }
+          }
+        }
+      }
+    }
+  }
+`
 
 export default IndexPage
